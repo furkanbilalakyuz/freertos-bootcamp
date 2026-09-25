@@ -43,6 +43,9 @@ extern "C" {
 /* UART'in tek sahibi UartTxTask olacak; handle sadece onun icin disa acik */
 extern UART_HandleTypeDef huart2;
 
+/* HAL zaman tabani (stm32f4xx_hal_timebase_tim.c) */
+extern TIM_HandleTypeDef htim7;
+
 void SystemClock_Config(void);
 void MX_LED_GPIO_Init(void);
 void MX_Button_EXTI_Init(void);

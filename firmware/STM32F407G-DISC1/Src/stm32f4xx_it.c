@@ -44,12 +44,12 @@ void UsageFault_Handler(void)
 }
 
 /*
- * SVC_Handler, PendSV_Handler burada tanimlanmiyor: FreeRTOS portu eklendiginde
- * onlari saglayacak. O asamada HAL zaman tabani da SysTick'ten bir TIM'e tasinmali.
+ * SVC_Handler ve PendSV_Handler FreeRTOS portundan gelir (FreeRTOSConfig.h eslemesi),
+ * SysTick_Handler ise cmsis_os2.c'den. HAL zaman tabani TIM7'dedir.
  */
-void SysTick_Handler(void)
+void TIM7_IRQHandler(void)
 {
-    HAL_IncTick();
+    HAL_TIM_IRQHandler(&htim7);
 }
 
 /* Buton kesmesi; ISR mantigi (t0, 30 ms filtre, buttonQ) HAL_GPIO_EXTI_Callback'te eklenecek */

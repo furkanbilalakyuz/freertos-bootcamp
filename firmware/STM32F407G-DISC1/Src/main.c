@@ -17,6 +17,9 @@
  */
 
 #include "main.h"
+#include "cmsis_os2.h"
+#include "app_freertos.h"
+#include "timer_us.h"
 
 UART_HandleTypeDef huart2;
 
@@ -28,10 +31,22 @@ int main(void)
     MX_LED_GPIO_Init();
     MX_Button_EXTI_Init();
     MX_USART2_UART_Init();
+    timer_us_init();
 
-    /* FreeRTOS gorevleri ve kuyruklari sonraki adimda eklenecek */
-    for (;;)
+    osKernelInitialize();
+    MX_FREERTOS_Init();
+    osKernelStart();
+
+    /* osKernelStart geri donmez; donerse heap yetersizdir */
+    Error_Handler();
+}
+
+/* TIM7 guncelleme kesmesi HAL tick'ini surer */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM7)
     {
+        HAL_IncTick();
     }
 }
 

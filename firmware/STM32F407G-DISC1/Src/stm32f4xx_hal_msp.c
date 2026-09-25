@@ -38,6 +38,15 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
     }
 }
 
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
+{
+    /* TIM2: timer_us serbest sayaci, kesme yok. TIM7 saati HAL_InitTick'te aciliyor. */
+    if (htim->Instance == TIM2)
+    {
+        __HAL_RCC_TIM2_CLK_ENABLE();
+    }
+}
+
 void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART2)

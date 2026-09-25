@@ -29,6 +29,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/components.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/files.cmake)
 
 set(HAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver)
+set(RTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source)
 
 # Add sources to executable/library
 target_sources(${PROJECT_NAME} PRIVATE
@@ -36,6 +37,20 @@ target_sources(${PROJECT_NAME} PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/Src/system_stm32f4xx.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32f4xx_it.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32f4xx_hal_msp.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32f4xx_hal_timebase_tim.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Src/timer_us.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Src/app_freertos.c"
+  # FreeRTOS cekirdegi + CMSIS-RTOS2 sarmalayici
+  "${RTOS_DIR}/croutine.c"
+  "${RTOS_DIR}/event_groups.c"
+  "${RTOS_DIR}/list.c"
+  "${RTOS_DIR}/queue.c"
+  "${RTOS_DIR}/stream_buffer.c"
+  "${RTOS_DIR}/tasks.c"
+  "${RTOS_DIR}/timers.c"
+  "${RTOS_DIR}/portable/GCC/ARM_CM4F/port.c"
+  "${RTOS_DIR}/portable/MemMang/heap_4.c"
+  "${RTOS_DIR}/CMSIS_RTOS_V2/cmsis_os2.c"
   # STM32F4 HAL (stm32f4xx_hal_conf.h'de etkin olan moduller)
   "${HAL_DIR}/Src/stm32f4xx_hal.c"
   "${HAL_DIR}/Src/stm32f4xx_hal_cortex.c"
@@ -61,6 +76,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   "${HAL_DIR}/Inc"
   "${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32F4xx/Include"
   "${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/RTOS2/Include"
+  "${RTOS_DIR}/include"
+  "${RTOS_DIR}/portable/GCC/ARM_CM4F"
+  "${RTOS_DIR}/CMSIS_RTOS_V2"
 )
 
 # Compiler options
