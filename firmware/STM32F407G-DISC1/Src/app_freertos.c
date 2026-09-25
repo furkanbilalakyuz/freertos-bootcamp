@@ -10,13 +10,22 @@
  ******************************************************************************
  */
 
+#include <stdbool.h>
 #include "app_freertos.h"
 #include "main.h"
+#include "timer_us.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
 osMessageQueueId_t buttonQ;
 osMessageQueueId_t txQ;
+
+volatile uint32_t button_drop_count;
+
+/* Yalnizca button_isr kullanir (tek kesme, ic ice girmez) */
+static uint32_t button_last_accept_us;
+static uint32_t button_next_id = 1U;
+static bool button_has_accepted;
 
 static osThreadId_t telemetryTaskHandle;
 static osThreadId_t buttonTaskHandle;
@@ -68,6 +77,34 @@ void MX_FREERTOS_Init(void)
     if ((telemetryTaskHandle == NULL) || (buttonTaskHandle == NULL) || (uartTxTaskHandle == NULL))
     {
         Error_Handler();
+    }
+}
+
+/*
+ * Tekrar-kenar filtresi: pencere son KABUL edilen basistan olculur. Ilk basista
+ * karsilastirilacak onceki kenar olmadigi icin dogrudan kabul edilir. Pencere
+ * icindeki sicrama kenarlari pencereyi uzatmaz; sadece yok sayilir.
+ */
+void button_isr(uint32_t t0_us)
+{
+    button_evt_t evt;
+
+    if (button_has_accepted &&
+        (timer_us_elapsed(button_last_accept_us, t0_us) < BUTTON_DEBOUNCE_US))
+    {
+        return;
+    }
+
+    button_has_accepted = true;
+    button_last_accept_us = t0_us;
+
+    evt.id = button_next_id++;
+    evt.t0_us = t0_us;
+
+    /* ISR'de timeout 0 olmali; sarmalayici FromISR + portYIELD_FROM_ISR kullanir */
+    if (osMessageQueuePut(buttonQ, &evt, 0U, 0U) != osOK)
+    {
+        button_drop_count++;
     }
 }
 

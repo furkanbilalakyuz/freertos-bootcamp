@@ -7,6 +7,8 @@
 
 #include "main.h"
 #include "stm32f4xx_it.h"
+#include "app_freertos.h"
+#include "timer_us.h"
 
 void NMI_Handler(void)
 {
@@ -52,10 +54,19 @@ void TIM7_IRQHandler(void)
     HAL_TIM_IRQHandler(&htim7);
 }
 
-/* Buton kesmesi; ISR mantigi (t0, 30 ms filtre, buttonQ) HAL_GPIO_EXTI_Callback'te eklenecek */
+/*
+ * Buton kesmesi. t0 ISR'in ilk komutunda alinir; HAL_GPIO_EXTI_IRQHandler/callback
+ * zincirinin getirecegi gecikme olcume girmesin diye HAL dagitimi kullanilmaz.
+ */
 void EXTI0_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(B1_Pin);
+    uint32_t t0 = timer_us();
+
+    if (__HAL_GPIO_EXTI_GET_IT(B1_Pin) != 0U)
+    {
+        __HAL_GPIO_EXTI_CLEAR_IT(B1_Pin);
+        button_isr(t0);
+    }
 }
 
 void USART2_IRQHandler(void)
