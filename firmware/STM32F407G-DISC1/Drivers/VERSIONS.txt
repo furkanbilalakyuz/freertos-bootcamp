@@ -1,0 +1,3 @@
+stm32f4xx-hal-driver 1f6451c 1f6451c
+cmsis-device-f4 a833f4a a833f4a
+cmsis-core afc5ca6 afc5ca6

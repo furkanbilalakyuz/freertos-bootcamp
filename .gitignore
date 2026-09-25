@@ -3,3 +3,4 @@ Release/
 *.o
 *.elf
 .metadata/
+build/
