@@ -39,6 +39,8 @@ extern "C" {
  * olarak buyuk veya esit olmali; aksi halde FromISR cagrilari guvensizdir.
  */
 #define APP_IRQ_PRIORITY    6U
+/* Buton EXTI'si UART kesmesini de kesebilsin diye bir kademe yuksek (FromISR icin izin verilen en yuksek) */
+#define BUTTON_IRQ_PRIORITY 5U
 
 /* UART'in tek sahibi UartTxTask olacak; handle sadece onun icin disa acik */
 extern UART_HandleTypeDef huart2;

@@ -20,6 +20,7 @@
 #include "cmsis_os2.h"
 #include "app_freertos.h"
 #include "timer_us.h"
+#include "cpu_load.h"
 
 UART_HandleTypeDef huart2;
 
@@ -32,6 +33,7 @@ int main(void)
     MX_Button_EXTI_Init();
     MX_USART2_UART_Init();
     timer_us_init();
+    calibrated_work_calibrate();
 
     osKernelInitialize();
     MX_FREERTOS_Init();
@@ -119,7 +121,7 @@ void MX_Button_EXTI_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-    HAL_NVIC_SetPriority(B1_EXTI_IRQn, APP_IRQ_PRIORITY, 0);
+    HAL_NVIC_SetPriority(B1_EXTI_IRQn, BUTTON_IRQ_PRIORITY, 0);
     HAL_NVIC_EnableIRQ(B1_EXTI_IRQn);
 }
 

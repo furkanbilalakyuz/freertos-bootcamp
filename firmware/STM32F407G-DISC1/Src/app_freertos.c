@@ -29,11 +29,14 @@ osMessageQueueId_t txQ;
 volatile uint8_t app_scenario = 1U;
 volatile uint32_t telemetry_period_ms = TELEMETRY_PERIOD_DEFAULT_MS;
 
-evt_log_t evt_log[EVT_LOG_LEN];
-volatile uint32_t evt_log_count;
+evt_log_t tel_log[TEL_LOG_LEN];
+volatile uint32_t tel_log_count;
+evt_log_t btn_log[BTN_LOG_LEN];
+volatile uint32_t btn_log_count;
 
 volatile uint32_t button_drop_count;
 volatile uint32_t tel_drop_count;
+volatile uint32_t tel_overrun_count;
 volatile uint32_t uart_err_count;
 
 /* Yalnizca button_isr kullanir (tek kesme, ic ice girmez) */
@@ -196,18 +199,34 @@ static void format_btn(tx_msg_t *msg, uint32_t id, uint8_t scenario)
  * Periyodik TEL mesaji. osDelayUntil ile periyot kaymaz; telemetry_period_ms
  * degisirse bir sonraki periyottan itibaren uygulanir. txQ doluysa beklemez
  * (periyodu bozmamak icin), mesaji atlar ve tel_drop_count'u artirir.
+ * Periyot kacirilirsa kacirilanlar art arda gonderilmez: zaman cizelgesi
+ * simdiye kaydirilir ve tel_overrun_count artar.
  */
 static void TelemetryTask(void *argument)
 {
     tx_item_t item;
     uint32_t seq = 0U;
+    uint32_t period;
+    uint32_t now;
     uint32_t next_wake = osKernelGetTickCount();
 
     (void)argument;
 
     for (;;)
     {
-        next_wake += telemetry_period_ms;
+        period = telemetry_period_ms;
+        if (period < TELEMETRY_PERIOD_MIN_MS)
+        {
+            period = TELEMETRY_PERIOD_MIN_MS;
+        }
+
+        next_wake += period;
+        now = osKernelGetTickCount();
+        if ((int32_t)(next_wake - now) < 0)
+        {
+            tel_overrun_count++;
+            next_wake = now + period;
+        }
         osDelayUntil(next_wake);
 
         seq++;
@@ -259,16 +278,34 @@ static void ButtonTask(void *argument)
     }
 }
 
+/* Tek yazar UartTxTask'tir */
 static void evt_log_append(const tx_meta_t *meta, uint32_t t3_us, uint32_t t4_us)
 {
-    evt_log_t *e = &evt_log[evt_log_count & (EVT_LOG_LEN - 1U)];
+    evt_log_t *e;
+
+    if (meta->kind == MSG_KIND_BTN)
+    {
+        e = &btn_log[btn_log_count & (BTN_LOG_LEN - 1U)];
+    }
+    else
+    {
+        e = &tel_log[tel_log_count & (TEL_LOG_LEN - 1U)];
+    }
 
     e->meta = *meta;
     e->t3_us = t3_us;
     e->t4_us = t4_us;
     /* Girdi tamamen yazildiktan sonra sayac ilerlesin (hata ayiklayici/okuyucu icin) */
     __DMB();
-    evt_log_count++;
+
+    if (meta->kind == MSG_KIND_BTN)
+    {
+        btn_log_count++;
+    }
+    else
+    {
+        tel_log_count++;
+    }
 }
 
 /*

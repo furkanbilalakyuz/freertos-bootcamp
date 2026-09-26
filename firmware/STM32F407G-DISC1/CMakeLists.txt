@@ -39,6 +39,7 @@ target_sources(${PROJECT_NAME} PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32f4xx_hal_msp.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/Src/stm32f4xx_hal_timebase_tim.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/Src/timer_us.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Src/cpu_load.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/Src/app_freertos.c"
   # FreeRTOS cekirdegi + CMSIS-RTOS2 sarmalayici
   "${RTOS_DIR}/croutine.c"

@@ -77,7 +77,7 @@ extern uint32_t SystemCoreClock;
 /*
  * FreeRTOS API'si (FromISR) cagirabilen en yuksek kesme onceligi.
  * Bundan sayisal olarak kucuk (daha yuksek oncelikli) kesmeler RTOS API'si cagiramaz.
- * EXTI0 ve USART2 main.h'deki APP_IRQ_PRIORITY (6) ile bu sinirin altinda kalir.
+ * EXTI0 (BUTTON_IRQ_PRIORITY 5) ve USART2 (APP_IRQ_PRIORITY 6) bu sinirin icinde kalir.
  */
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY  5
 

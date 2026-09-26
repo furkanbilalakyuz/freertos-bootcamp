@@ -21,7 +21,11 @@ extern "C" {
 #define BUTTON_DEBOUNCE_US  30000U  /* kabul edilen basistan sonraki tekrar-kenar penceresi */
 
 #define TELEMETRY_PERIOD_DEFAULT_MS  100U
-#define EVT_LOG_LEN         64U     /* 2'nin kuvveti olmali (indeks maskeleme) */
+#define TELEMETRY_PERIOD_MIN_MS      1U     /* 0 periyot en yuksek oncelikli gorevi kilitlerdi */
+
+/* Kayit uzunluklari 2'nin kuvveti olmali (indeks maskeleme) */
+#define TEL_LOG_LEN         64U
+#define BTN_LOG_LEN         256U    /* R olcumu icin: en az 200 buton olayi */
 
 /* Buton ISR'inin buttonQ'ya FromISR ile gonderdigi olay */
 typedef struct
@@ -79,13 +83,19 @@ extern volatile uint8_t app_scenario;
 /* TelemetryTask periyodu; bir sonraki periyottan itibaren gecerli olur */
 extern volatile uint32_t telemetry_period_ms;
 
-/* Olay kaydi: son EVT_LOG_LEN girdi, evt_log_count toplam yazilan girdi sayisi */
-extern evt_log_t evt_log[EVT_LOG_LEN];
-extern volatile uint32_t evt_log_count;
+/*
+ * Olay kayitlari (ring buffer), TEL ve BTN ayri: TEL trafigi BTN kayitlarini ezmesin.
+ * *_log_count toplam yazilan girdi sayisidir; son girdi [(count - 1) % LEN].
+ */
+extern evt_log_t tel_log[TEL_LOG_LEN];
+extern volatile uint32_t tel_log_count;
+extern evt_log_t btn_log[BTN_LOG_LEN];
+extern volatile uint32_t btn_log_count;
 
 /* Hata/kayip sayaclari */
 extern volatile uint32_t button_drop_count;  /* buttonQ dolu: kaybolan basis */
 extern volatile uint32_t tel_drop_count;     /* txQ dolu: atlanan TEL mesaji */
+extern volatile uint32_t tel_overrun_count;  /* TelemetryTask periyodu kacirdi, atlandi */
 extern volatile uint32_t uart_err_count;     /* UART baslatma hatasi veya TC zaman asimi */
 
 /* EXTI0 ISR'inden cagrilir: 30 ms filtre + buttonQ'ya gonderim. t0_us: ISR girisindeki zaman */
